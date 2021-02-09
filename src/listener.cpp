@@ -31,18 +31,46 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <iostream>
 #include <string>
+#include "kdtree.h"
 
 /**
  * This tutorial demonstrates simple receipt of messages over the ROS system.
  */
 // %Tag(CALLBACK)%
+float ieee_float(uint32_t f)
+{
+    float ret;
+    std::memcpy(&ret, &f, sizeof(float));
+    return ret;
+}
+
 void pclCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
-  std::cout << std::to_string(msg->height) << " - " << std::to_string(msg->width) << " - " << std::to_string(msg->row_step) << "\n";
-  for (int i=0; i<(int)(msg->width)*4; i++){
+  std::cout << (msg->height) << " - " << (msg->width) << " - " << (msg->row_step) << std::endl;
+  /*
+  for (int i=0; i<4; i++){
+    std::cout << msg->fields[i].name << " - " << std::to_string(msg->fields[i].offset) << " - " << std::to_string(msg->fields[i].datatype) << " - " << std::to_string(msg->fields[i].count) << "\n";
+  }
+  */
+  for (int i=0; i<(int)(msg->width); i++){
     for (int j=0; j<4; j++) {
-      std::cout << msg->fields[j].name << std::to_string(i) << " - " << std::to_string(msg->data[j+i*4]) << "\n"; 
+      uint32_t foo_ = (uint32_t)((msg->data[i*16+j*4+3] << 24) | (msg->data[i*16+j*4+2] << 16) | (msg->data[i*16+j*4+1] << 8) | (msg->data[i*16+j*4] << 0));
+      float foo = ieee_float(foo_);
+      /*
+      float foo = msg->data[i*16+j*4+3];
+      makestd::cout << foo << " - " << foo_ << std::endl;
+      std::cout << std::hex << (msg->data[i*16+j*4+3] << 24) << std::endl;
+      std::cout << std::hex << (msg->data[i*16+j*4+2] << 8) << std::endl;
+      std::cout << std::hex << (msg->data[i*16+j*4+1] << 4) << std::endl;
+      std::cout << std::hex << (msg->data[i*16+j*4] << 0) << std::endl;
+      std::cout << std::hex << foo_ << std::endl;
+      
+      std::cout << std::setfill('0') << std::setw(8) << std::hex << *(reinterpret_cast<uint32_t*>(&foo)) << std::endl;
+      std::cout << std::hex << *((int*)&foo) << std::endl;
+      */
+      std::cout << msg->fields[j].name << (i) << " - " << (foo) << std::endl;
     }
+    std::cout << std::endl;
   }
   //ROS_INFO("I heard: [%s]", msg->data.c_str());
 }
