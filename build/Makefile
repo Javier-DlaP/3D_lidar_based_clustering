@@ -157,6 +157,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named subscriber
+
+# Build rule for target.
+subscriber: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 subscriber
+.PHONY : subscriber
+
+# fast build rule for target.
+subscriber/fast:
+	$(MAKE) -f CMakeFiles/subscriber.dir/build.make CMakeFiles/subscriber.dir/build
+.PHONY : subscriber/fast
+
+#=============================================================================
 # Target rules for targets named ROSBUILD_genmsg_lisp
 
 # Build rule for target.
@@ -168,19 +181,6 @@ ROSBUILD_genmsg_lisp: cmake_check_build_system
 ROSBUILD_genmsg_lisp/fast:
 	$(MAKE) -f CMakeFiles/ROSBUILD_genmsg_lisp.dir/build.make CMakeFiles/ROSBUILD_genmsg_lisp.dir/build
 .PHONY : ROSBUILD_genmsg_lisp/fast
-
-#=============================================================================
-# Target rules for targets named listener
-
-# Build rule for target.
-listener: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 listener
-.PHONY : listener
-
-# fast build rule for target.
-listener/fast:
-	$(MAKE) -f CMakeFiles/listener.dir/build.make CMakeFiles/listener.dir/build
-.PHONY : listener/fast
 
 #=============================================================================
 # Target rules for targets named ROSBUILD_genmsg_cpp
@@ -481,32 +481,32 @@ gtest/fast:
 	$(MAKE) -f gtest/googlemock/gtest/CMakeFiles/gtest.dir/build.make gtest/googlemock/gtest/CMakeFiles/gtest.dir/build
 .PHONY : gtest/fast
 
-src/listener.o: src/listener.cpp.o
+src/subscriber.o: src/subscriber.cpp.o
 
-.PHONY : src/listener.o
+.PHONY : src/subscriber.o
 
 # target to build an object file
-src/listener.cpp.o:
-	$(MAKE) -f CMakeFiles/listener.dir/build.make CMakeFiles/listener.dir/src/listener.cpp.o
-.PHONY : src/listener.cpp.o
+src/subscriber.cpp.o:
+	$(MAKE) -f CMakeFiles/subscriber.dir/build.make CMakeFiles/subscriber.dir/src/subscriber.cpp.o
+.PHONY : src/subscriber.cpp.o
 
-src/listener.i: src/listener.cpp.i
+src/subscriber.i: src/subscriber.cpp.i
 
-.PHONY : src/listener.i
+.PHONY : src/subscriber.i
 
 # target to preprocess a source file
-src/listener.cpp.i:
-	$(MAKE) -f CMakeFiles/listener.dir/build.make CMakeFiles/listener.dir/src/listener.cpp.i
-.PHONY : src/listener.cpp.i
+src/subscriber.cpp.i:
+	$(MAKE) -f CMakeFiles/subscriber.dir/build.make CMakeFiles/subscriber.dir/src/subscriber.cpp.i
+.PHONY : src/subscriber.cpp.i
 
-src/listener.s: src/listener.cpp.s
+src/subscriber.s: src/subscriber.cpp.s
 
-.PHONY : src/listener.s
+.PHONY : src/subscriber.s
 
 # target to generate assembly for a file
-src/listener.cpp.s:
-	$(MAKE) -f CMakeFiles/listener.dir/build.make CMakeFiles/listener.dir/src/listener.cpp.s
-.PHONY : src/listener.cpp.s
+src/subscriber.cpp.s:
+	$(MAKE) -f CMakeFiles/subscriber.dir/build.make CMakeFiles/subscriber.dir/src/subscriber.cpp.s
+.PHONY : src/subscriber.cpp.s
 
 # Help Target
 help:
@@ -516,8 +516,8 @@ help:
 	@echo "... depend"
 	@echo "... install/strip"
 	@echo "... edit_cache"
+	@echo "... subscriber"
 	@echo "... ROSBUILD_genmsg_lisp"
-	@echo "... listener"
 	@echo "... ROSBUILD_genmsg_cpp"
 	@echo "... test-results-run"
 	@echo "... rosbuild_premsgsrvgen"
@@ -545,9 +545,9 @@ help:
 	@echo "... gmock"
 	@echo "... gtest_main"
 	@echo "... gtest"
-	@echo "... src/listener.o"
-	@echo "... src/listener.i"
-	@echo "... src/listener.s"
+	@echo "... src/subscriber.o"
+	@echo "... src/subscriber.i"
+	@echo "... src/subscriber.s"
 .PHONY : help
 
 
