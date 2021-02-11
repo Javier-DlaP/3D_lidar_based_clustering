@@ -22,7 +22,9 @@ void pclCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
   pcl::PointCloud<pcl::PointXYZI>::Ptr point_cloud = sensor2pcl(msg);
 
-  std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = segmentPlane(point_cloud, 50, 0.2);
+  pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_point_cloud = filterCloud(point_cloud, 0.3, Eigen::Vector4f (-20,-20,-20,1), Eigen::Vector4f (20,20,20,1));
+
+  std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = segmentPlane(filtered_point_cloud, 50, 0.2);
 
   std::cout << std::endl;
 }
@@ -61,8 +63,54 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr sensor2pcl(const sensor_msgs::PointCloud2::
   }
   auto endTime = std::chrono::steady_clock::now();
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-  std::cout << elapsedTime.count() << " milliseconds" << std::endl;
+  std::cout << elapsedTime.count() << " milliseconds, " << point_cloud->points.size() << " points" << std::endl;
   return point_cloud;
+}
+
+// filter the point cloud based on the region of interest and the voxel size
+pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, float filterRes, Eigen::Vector4f minPoint, Eigen::Vector4f maxPoint)
+{
+  std::cout << "Filtering point cloud: ";
+  auto startTime = std::chrono::steady_clock::now();
+
+  // filter based on voxels
+  pcl::VoxelGrid<pcl::PointXYZI> vg;
+  pcl::PointCloud<pcl::PointXYZI>::Ptr cloudFiltered(new pcl::PointCloud<pcl::PointXYZI>);
+  vg.setInputCloud(cloud);
+  vg.setLeafSize(filterRes, filterRes, filterRes);
+  vg.filter(*cloudFiltered);
+
+  // filter based on region of interest
+  pcl::PointCloud<pcl::PointXYZI>::Ptr cloudRegion(new pcl::PointCloud<pcl::PointXYZI>);  
+  pcl::CropBox<pcl::PointXYZI> region(true);
+  region.setMin(minPoint);
+  region.setMax(maxPoint);
+  region.setInputCloud(cloudFiltered);
+  region.filter(*cloudRegion);
+/*
+  std::vector<int> indices;
+  pcl::CropBox<pcl::PointXYZI> roof(true);
+  roof.setMin(minPoint);
+  roof.setMax(maxPoint);
+  roof.setInputCloud(cloudRegion);
+  roof.filter(indices);
+
+  pcl::PointIndices::Ptr inliers {new pcl::PointIndices};
+  for(int point : indices){
+    inliers->indices.push_back(point);
+  }
+
+  pcl::ExtractIndices<pcl::PointXYZI> extract;
+  extract.setInputCloud(cloudRegion);
+  extract.setIndices(inliers);
+  extract.setNegative(true);
+  extract.filter(*cloudRegion);
+*/
+  auto endTime = std::chrono::steady_clock::now();
+  auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+  std::cout << elapsedTime.count() << " milliseconds, " << cloudFiltered->points.size() << " points" << std::endl;
+
+  return cloudRegion;
 }
 
 // apply ransac to segment into floor and 
@@ -74,8 +122,11 @@ std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>:
   std::unordered_set<int> inliersResult;
 	srand(time(NULL));
     
-	while(maxIterations--){
+  // iterate the number of iteration
+	for(int i=0; i<maxIterations; i++){
     std::unordered_set<int> inliers;
+
+    // get 3 random point from the cloud and create the 3D-plane
     while(inliers.size() < 3){
 		  inliers.insert(rand()%(cloud->points.size()));
     }
@@ -96,11 +147,12 @@ std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>:
 		z3 = cloud->points[*itr].z;
 
     float a, b, c, d;
-
 		a = ((y2 - y1)*(z3 - z1)) - ((z2 - z1)*(y3 - y1));
 		b = ((z2 - z1)*(x3 - x1)) - ((x2 - x1)*(z3 - z1));
 		c = ((x2 - x1)*(y3 - y1)) - ((y2 - y1)*(x3 - x1));
 		d = -(a*x1 + b*y1 + c*z1);
+
+    // get the points that lie on the plane within the distance threshold
 		for(int index = 0; index < (int) cloud->points.size(); index++){
 			if(inliers.count(index) > 0) continue;
             
@@ -116,14 +168,16 @@ std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>:
 			}
 		}
 
+    // store the results of the plane on which lies the most points
 		if(inliers.size()>inliersResult.size()){
 			inliersResult = inliers;
 		}
 	}
-    
+
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloudInliers(new pcl::PointCloud<pcl::PointXYZI>());
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZI>());
 
+  // divide the floor and the rest in 2 different point clouds
   for (int index = 0; index < (int) cloud->points.size(); index++){
     pcl::PointXYZI point = cloud->points[index];
     if(inliersResult.count(index)){
@@ -135,7 +189,7 @@ std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>:
 
   auto endTime = std::chrono::steady_clock::now();
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-  std::cout << elapsedTime.count() << " milliseconds" << std::endl;
+  std::cout << elapsedTime.count() << " milliseconds, " << cloudInliers->points.size() << " points" << std::endl;
 
   return std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> (cloudOutliers,cloudInliers);
 }
