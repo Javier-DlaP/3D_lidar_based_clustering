@@ -22,9 +22,13 @@ void pclCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
   pcl::PointCloud<pcl::PointXYZI>::Ptr point_cloud = sensor2pcl(msg);
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_point_cloud = filterCloud(point_cloud, 0.3, Eigen::Vector4f (-20,-20,-20,1), Eigen::Vector4f (20,20,20,1));
+  pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_point_cloud = filterCloud(point_cloud, 0.3, Eigen::Vector4f (-10,-15,-10,1), Eigen::Vector4f (10,25,10,1));
 
   std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = segmentPlane(filtered_point_cloud, 50, 0.2);
+
+  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = clustering(segmentCloud.first, 0.3, 30, 300);
+
+  std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> bBoxes = boundingBoxes(clusters);
 
   std::cout << std::endl;
 }
@@ -90,12 +94,12 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud(pcl::PointCloud<pcl::PointXYZI>
 /*
   std::vector<int> indices;
   pcl::CropBox<pcl::PointXYZI> roof(true);
-  roof.setMin(minPoint);
-  roof.setMax(maxPoint);
+  roof.setMin(Eigen::Vector4f(-2.0, -2.0, -3.0, 1.0));
+  roof.setMax(Eigen::Vector4f(3.0, 2.0, 3.0, 1.0));
   roof.setInputCloud(cloudRegion);
   roof.filter(indices);
 
-  pcl::PointIndices::Ptr inliers {new pcl::PointIndices};
+  pcl::PointIndices::Ptr inliers {new pcl::PointIndices()};
   for(int point : indices){
     inliers->indices.push_back(point);
   }
@@ -108,7 +112,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud(pcl::PointCloud<pcl::PointXYZI>
 */
   auto endTime = std::chrono::steady_clock::now();
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-  std::cout << elapsedTime.count() << " milliseconds, " << cloudFiltered->points.size() << " points" << std::endl;
+  std::cout << elapsedTime.count() << " milliseconds, " << cloudRegion->points.size() << " points" << std::endl;
 
   return cloudRegion;
 }
@@ -192,4 +196,110 @@ std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>:
   std::cout << elapsedTime.count() << " milliseconds, " << cloudInliers->points.size() << " points" << std::endl;
 
   return std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> (cloudOutliers,cloudInliers);
+}
+
+// cluster the point cloud according to the kdtree algorithm
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clustering(typename pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, float clusterTolerance, int minSize, int maxSize)
+{
+  std::cout << "Clustering the point cloud: ";
+  auto startTime = std::chrono::steady_clock::now();
+
+  // create the vector where the clusters will be stored
+  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters;
+
+  // insert each point in the kdtree
+  std::vector<std::vector<float>> vpoints;
+  KdTree* tree = new KdTree;
+  for(int i=0; i<(int)cloud->points.size(); i++){
+    pcl::PointXYZI point = cloud->points[i];
+    vpoints.push_back(std::vector<float> {point.x, point.y, point.z});
+    tree->insert(std::vector<float> {point.x, point.y, point.z}, i);
+  }
+
+  // add to the vector of clusters the point cloud of nearby points that store a number of points between the maximum and the minumum selected
+  std::vector<std::vector<int>> intclusters;
+	std::vector<bool> processed(vpoints.size(), false);
+	for (int i=0; i<(int)vpoints.size(); i++){
+		if(processed[i]==false){
+			std::vector<int> vcluster;
+			proximity(vpoints, i, vcluster, processed, tree, clusterTolerance);
+      if((int)vcluster.size() >= minSize && (int)vcluster.size() <= maxSize){
+			  intclusters.push_back(vcluster);
+      }
+		}
+	}
+
+  for (std::vector<int> clusterIndex : intclusters){
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster (new pcl::PointCloud<pcl::PointXYZI>);
+    for (int index : clusterIndex){
+      cloudCluster->points.push_back(cloud->points[index]);
+    }
+    cloudCluster->width = cloudCluster->points.size();
+    cloudCluster->height = 1;
+    cloudCluster->is_dense = true;
+
+    clusters.push_back(cloudCluster);
+  }
+
+  auto endTime = std::chrono::steady_clock::now();
+  auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+  std::cout << elapsedTime.count() << " milliseconds, " << clusters.size() << " clusters" << std::endl;
+
+  return clusters;
+}
+
+// add points to a cluster if it is within distance tolerance
+void proximity(std::vector<std::vector<float>> points, int id_point, std::vector<int>& cluster, std::vector<bool>& processed, KdTree* tree, float distanceTol)
+{
+	processed[id_point] = true;
+	cluster.push_back(id_point);
+	for (int id_near_point : tree->search(points[id_point], distanceTol)){
+		if(processed[id_near_point] == false){
+			proximity(points, id_near_point, cluster, processed, tree, distanceTol);
+		}
+	}
+}
+
+// create all the bounding boxes of the clusters
+std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBoxes(std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters)
+{
+  std::cout << "Creating bounding boxes: ";
+  auto startTime = std::chrono::steady_clock::now();
+
+  std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBoxes;
+
+  for(std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>::iterator cluster = clusters.begin(); cluster != clusters.end(); ++cluster) {
+    boundingBoxes.push_back(boundingBox(*cluster));
+  }
+
+  auto endTime = std::chrono::steady_clock::now();
+  auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+  std::cout << elapsedTime.count() << " milliseconds" << std::endl;
+
+  return boundingBoxes;
+}
+
+// create maximum and the minimum points of the cluster bounding box
+std::pair<pcl::PointXYZ, pcl::PointXYZ> boundingBox(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster)
+{
+  std::pair<pcl::PointXYZ, pcl::PointXYZ> box;
+  pcl::PointXYZ minPoint, maxPoint;
+  
+  std::vector<float> xs,ys,zs;
+  for(int i = 0; i < (int)cluster->points.size(); i++){
+    xs.push_back(cluster->points[i].x);
+    ys.push_back(cluster->points[i].y);
+    zs.push_back(cluster->points[i].z);
+  }
+
+  minPoint.x = *min_element(xs.begin(), xs.end());
+  minPoint.y = *min_element(ys.begin(), ys.end());
+  minPoint.z = *min_element(zs.begin(), zs.end());
+
+  maxPoint.x = *min_element(xs.begin(), xs.end());
+  maxPoint.y = *min_element(ys.begin(), ys.end());
+  maxPoint.z = *min_element(zs.begin(), zs.end());
+
+  box = std::make_pair(minPoint, maxPoint);
+  return box;
 }
