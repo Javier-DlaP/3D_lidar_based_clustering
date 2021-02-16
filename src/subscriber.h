@@ -2,6 +2,8 @@
 #define SUBSCRIBER_H
 
 #include <ros/ros.h>
+#include <cstdlib>
+#include <stdlib.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <iostream>
@@ -13,6 +15,8 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl/filters/extract_indices.h>
 #include <chrono>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 #include "kdtree.h"
 
 int main(int argc, char **argv);
@@ -32,5 +36,7 @@ void proximity(std::vector<std::vector<float>> points, int id_point, std::vector
 std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBoxes(std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters);
 
 std::pair<pcl::PointXYZ, pcl::PointXYZ> boundingBox(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster);
+
+void showBbRviz(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBoxes);
 
 #endif

@@ -4,6 +4,10 @@
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: ../src/kdtree.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: ../src/subscriber.cpp
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: ../src/subscriber.h
+CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/geometry_msgs/Point.h
+CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/geometry_msgs/Pose.h
+CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/geometry_msgs/Quaternion.h
+CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/geometry_msgs/Vector3.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/ros/advertise_options.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/ros/advertise_service_options.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/ros/assert.h
@@ -62,8 +66,11 @@ CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/ros/wal
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/rosconsole/macros_generated.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/sensor_msgs/PointCloud2.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/sensor_msgs/PointField.h
+CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/std_msgs/ColorRGBA.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/std_msgs/Header.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/std_msgs/String.h
+CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/visualization_msgs/Marker.h
+CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/visualization_msgs/MarkerArray.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/xmlrpcpp/XmlRpcDecl.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /opt/ros/melodic/include/xmlrpcpp/XmlRpcValue.h
 CMakeFiles/subscriber.dir/src/subscriber.cpp.o: /usr/include/eigen3/Eigen/Cholesky

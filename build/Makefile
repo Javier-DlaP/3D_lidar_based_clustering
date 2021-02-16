@@ -157,6 +157,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named basic_shapes
+
+# Build rule for target.
+basic_shapes: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 basic_shapes
+.PHONY : basic_shapes
+
+# fast build rule for target.
+basic_shapes/fast:
+	$(MAKE) -f CMakeFiles/basic_shapes.dir/build.make CMakeFiles/basic_shapes.dir/build
+.PHONY : basic_shapes/fast
+
+#=============================================================================
 # Target rules for targets named subscriber
 
 # Build rule for target.
@@ -481,6 +494,33 @@ gtest/fast:
 	$(MAKE) -f gtest/googlemock/gtest/CMakeFiles/gtest.dir/build.make gtest/googlemock/gtest/CMakeFiles/gtest.dir/build
 .PHONY : gtest/fast
 
+src/basic_shapes.o: src/basic_shapes.cpp.o
+
+.PHONY : src/basic_shapes.o
+
+# target to build an object file
+src/basic_shapes.cpp.o:
+	$(MAKE) -f CMakeFiles/basic_shapes.dir/build.make CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o
+.PHONY : src/basic_shapes.cpp.o
+
+src/basic_shapes.i: src/basic_shapes.cpp.i
+
+.PHONY : src/basic_shapes.i
+
+# target to preprocess a source file
+src/basic_shapes.cpp.i:
+	$(MAKE) -f CMakeFiles/basic_shapes.dir/build.make CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.i
+.PHONY : src/basic_shapes.cpp.i
+
+src/basic_shapes.s: src/basic_shapes.cpp.s
+
+.PHONY : src/basic_shapes.s
+
+# target to generate assembly for a file
+src/basic_shapes.cpp.s:
+	$(MAKE) -f CMakeFiles/basic_shapes.dir/build.make CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.s
+.PHONY : src/basic_shapes.cpp.s
+
 src/subscriber.o: src/subscriber.cpp.o
 
 .PHONY : src/subscriber.o
@@ -516,6 +556,7 @@ help:
 	@echo "... depend"
 	@echo "... install/strip"
 	@echo "... edit_cache"
+	@echo "... basic_shapes"
 	@echo "... subscriber"
 	@echo "... ROSBUILD_genmsg_lisp"
 	@echo "... ROSBUILD_genmsg_cpp"
@@ -545,6 +586,9 @@ help:
 	@echo "... gmock"
 	@echo "... gtest_main"
 	@echo "... gtest"
+	@echo "... src/basic_shapes.o"
+	@echo "... src/basic_shapes.i"
+	@echo "... src/basic_shapes.s"
 	@echo "... src/subscriber.o"
 	@echo "... src/subscriber.i"
 	@echo "... src/subscriber.s"

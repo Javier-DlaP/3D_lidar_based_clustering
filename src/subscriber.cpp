@@ -1,15 +1,23 @@
 #include "subscriber.h"
 
+ros::Publisher marker_pub;
+//geometry_msgs::Pose vehicle_pose;
+//bool first_callback = true;
+
 int main(int argc, char **argv)
 {
   // function required before using any other ROS based functions
-  ros::init(argc, argv, "listener");
+  ros::init(argc, argv, "subscriber");
 
   // access point to ROS
   ros::NodeHandle nh;
   
   // Subscribers
   ros::Subscriber point_cloud = nh.subscribe("/carla/ego_vehicle/lidar/lidar1/point_cloud", 1, pclCallback);
+  //ros::Subscriber point_cloud = nh.subscribe("/carla/ego_vehicle/lidar/lidar1/point_cloud", 1, poseCallback);
+
+  // Publishers
+  marker_pub = nh.advertise<visualization_msgs::MarkerArray>("/t4ac_perception/kd_tree", 1);
 
   // function that calls each callback
   ros::spin();
@@ -20,15 +28,19 @@ int main(int argc, char **argv)
 // this function is called every time the pcl topic is updated
 void pclCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
+  //system("clear");
+
   pcl::PointCloud<pcl::PointXYZI>::Ptr point_cloud = sensor2pcl(msg);
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_point_cloud = filterCloud(point_cloud, 0.3, Eigen::Vector4f (-10,-15,-10,1), Eigen::Vector4f (10,25,10,1));
+  pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_point_cloud = filterCloud(point_cloud, 0.3, Eigen::Vector4f (-40,-10,-10,1), Eigen::Vector4f (50,20,10,1));
 
-  std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = segmentPlane(filtered_point_cloud, 50, 0.2);
+  std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = segmentPlane(filtered_point_cloud, 50, 0.3);
 
-  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = clustering(segmentCloud.first, 0.3, 30, 300);
+  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = clustering(segmentCloud.first, 1, 0, 20);
 
   std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> bBoxes = boundingBoxes(clusters);
+
+  showBbRviz(bBoxes);
 
   std::cout << std::endl;
 }
@@ -296,10 +308,57 @@ std::pair<pcl::PointXYZ, pcl::PointXYZ> boundingBox(pcl::PointCloud<pcl::PointXY
   minPoint.y = *min_element(ys.begin(), ys.end());
   minPoint.z = *min_element(zs.begin(), zs.end());
 
-  maxPoint.x = *min_element(xs.begin(), xs.end());
-  maxPoint.y = *min_element(ys.begin(), ys.end());
-  maxPoint.z = *min_element(zs.begin(), zs.end());
+  maxPoint.x = *max_element(xs.begin(), xs.end());
+  maxPoint.y = *max_element(ys.begin(), ys.end());
+  maxPoint.z = *max_element(zs.begin(), zs.end());
 
   box = std::make_pair(minPoint, maxPoint);
   return box;
+}
+
+// publish and create the MarkerArray that contains the boxes
+void showBbRviz(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBoxes)
+{
+  visualization_msgs::MarkerArray marker_bbs;
+
+  int i = 0;
+  for(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>>::iterator boundingBox = boundingBoxes.begin(); boundingBox != boundingBoxes.end(); ++boundingBox) {
+    visualization_msgs::Marker marker_bb;
+
+    marker_bb.header.frame_id = "86";
+    marker_bb.header.stamp = ros::Time::now();
+    //marker_bb.ns = "subscriber";
+    marker_bb.id = i;
+
+    marker_bb.type = visualization_msgs::Marker::CUBE;
+    marker_bb.action = visualization_msgs::Marker::ADD;
+
+    marker_bb.pose.position.x = ((*boundingBox).first.x + (*boundingBox).second.x) / 2;
+    marker_bb.pose.position.y = ((*boundingBox).first.y + (*boundingBox).second.y) / 2;
+    marker_bb.pose.position.z = ((*boundingBox).first.z + (*boundingBox).second.z) / 2 + 2.5;
+    marker_bb.pose.orientation.x = 0.0;
+    marker_bb.pose.orientation.y = 0.0;
+    marker_bb.pose.orientation.z = 0.0;
+    marker_bb.pose.orientation.w = 0.0;
+
+    marker_bb.scale.x = abs((*boundingBox).first.x - (*boundingBox).second.x);
+    marker_bb.scale.y = abs((*boundingBox).first.y - (*boundingBox).second.y);
+    marker_bb.scale.z = abs((*boundingBox).first.z - (*boundingBox).second.z);
+    //marker_bb.scale.x = 1;
+    //marker_bb.scale.y = 1;
+    //marker_bb.scale.z = 1;
+
+    marker_bb.color.r = 0.0;
+    marker_bb.color.g = 0.0;
+    marker_bb.color.b = 1.0;
+    marker_bb.color.a = 0.5;
+
+    marker_bb.lifetime = ros::Duration();
+
+    marker_bbs.markers.push_back(marker_bb);
+
+    i++;
+  }
+
+  marker_pub.publish(marker_bbs);
 }
