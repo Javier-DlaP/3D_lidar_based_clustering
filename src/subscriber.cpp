@@ -14,7 +14,6 @@ int main(int argc, char **argv)
   
   // Subscribers
   ros::Subscriber point_cloud = nh.subscribe("/carla/ego_vehicle/lidar/lidar1/point_cloud", 1, pclCallback);
-  //ros::Subscriber point_cloud = nh.subscribe("/carla/ego_vehicle/lidar/lidar1/point_cloud", 1, poseCallback);
 
   // Publishers
   marker_pub = nh.advertise<visualization_msgs::MarkerArray>("/t4ac_perception/kd_tree", 1);
@@ -32,11 +31,11 @@ void pclCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr point_cloud = sensor2pcl(msg);
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_point_cloud = filterCloud(point_cloud, 0.3, Eigen::Vector4f (-40,-10,-10,1), Eigen::Vector4f (50,20,10,1));
+  pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_point_cloud = filterCloud(point_cloud, 0.3, Eigen::Vector4f (-40,-5,-10,1), Eigen::Vector4f (50,17,10,1));
 
   std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = segmentPlane(filtered_point_cloud, 50, 0.3);
 
-  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = clustering(segmentCloud.first, 1, 0, 20);
+  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = clustering(segmentCloud.first, 1.3, 20, 150);
 
   std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> bBoxes = boundingBoxes(clusters);
 
@@ -97,7 +96,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud(pcl::PointCloud<pcl::PointXYZI>
   vg.filter(*cloudFiltered);
 
   // filter based on region of interest
-  pcl::PointCloud<pcl::PointXYZI>::Ptr cloudRegion(new pcl::PointCloud<pcl::PointXYZI>);  
+  pcl::PointCloud<pcl::PointXYZI>::Ptr cloudRegion (new pcl::PointCloud<pcl::PointXYZI>);
   pcl::CropBox<pcl::PointXYZI> region(true);
   region.setMin(minPoint);
   region.setMax(maxPoint);
@@ -319,15 +318,22 @@ std::pair<pcl::PointXYZ, pcl::PointXYZ> boundingBox(pcl::PointCloud<pcl::PointXY
 // publish and create the MarkerArray that contains the boxes
 void showBbRviz(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBoxes)
 {
+  // delete all previous cubes
   visualization_msgs::MarkerArray marker_bbs;
+  visualization_msgs::Marker marker_bb;
+  marker_bb.type = visualization_msgs::Marker::CUBE;
+  marker_bb.action = visualization_msgs::Marker::DELETEALL;
+  marker_bbs.markers.push_back(marker_bb);
+  marker_pub.publish(marker_bbs);
+
+  marker_bbs = visualization_msgs::MarkerArray();
 
   int i = 0;
   for(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>>::iterator boundingBox = boundingBoxes.begin(); boundingBox != boundingBoxes.end(); ++boundingBox) {
     visualization_msgs::Marker marker_bb;
 
-    marker_bb.header.frame_id = "86";
+    marker_bb.header.frame_id = "ego_vehicle/lidar/lidar1";
     marker_bb.header.stamp = ros::Time::now();
-    //marker_bb.ns = "subscriber";
     marker_bb.id = i;
 
     marker_bb.type = visualization_msgs::Marker::CUBE;
@@ -335,7 +341,8 @@ void showBbRviz(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBox
 
     marker_bb.pose.position.x = ((*boundingBox).first.x + (*boundingBox).second.x) / 2;
     marker_bb.pose.position.y = ((*boundingBox).first.y + (*boundingBox).second.y) / 2;
-    marker_bb.pose.position.z = ((*boundingBox).first.z + (*boundingBox).second.z) / 2 + 2.5;
+    marker_bb.pose.position.z = ((*boundingBox).first.z + (*boundingBox).second.z) / 2;
+
     marker_bb.pose.orientation.x = 0.0;
     marker_bb.pose.orientation.y = 0.0;
     marker_bb.pose.orientation.z = 0.0;
@@ -344,14 +351,11 @@ void showBbRviz(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBox
     marker_bb.scale.x = abs((*boundingBox).first.x - (*boundingBox).second.x);
     marker_bb.scale.y = abs((*boundingBox).first.y - (*boundingBox).second.y);
     marker_bb.scale.z = abs((*boundingBox).first.z - (*boundingBox).second.z);
-    //marker_bb.scale.x = 1;
-    //marker_bb.scale.y = 1;
-    //marker_bb.scale.z = 1;
 
-    marker_bb.color.r = 0.0;
-    marker_bb.color.g = 0.0;
+    marker_bb.color.r = 1.0;
+    marker_bb.color.g = 1.0;
     marker_bb.color.b = 1.0;
-    marker_bb.color.a = 0.5;
+    marker_bb.color.a = 0.8;
 
     marker_bb.lifetime = ros::Duration();
 

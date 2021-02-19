@@ -57,74 +57,7 @@ include CMakeFiles/basic_shapes.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/basic_shapes.dir/flags.make
 
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: CMakeFiles/basic_shapes.dir/flags.make
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: ../src/basic_shapes.cpp
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: ../manifest.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/cpp_common/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/rostime/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/roscpp_traits/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/roscpp_serialization/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/catkin/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/genmsg/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/genpy/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/message_runtime/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/std_msgs/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/gencpp/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/geneus/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/gennodejs/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/genlisp/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/message_generation/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/rosbuild/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/rosconsole/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/rosgraph_msgs/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/xmlrpcpp/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/roscpp/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/rosgraph/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/ros_environment/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/rospack/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/roslib/package.xml
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o: /opt/ros/melodic/share/rospy/package.xml
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/robesafe/t4ac_ws/src/t4ac_perception/Object_detection_using_lidar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o -c /home/robesafe/t4ac_ws/src/t4ac_perception/Object_detection_using_lidar/src/basic_shapes.cpp
-
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/robesafe/t4ac_ws/src/t4ac_perception/Object_detection_using_lidar/src/basic_shapes.cpp > CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.i
-
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/robesafe/t4ac_ws/src/t4ac_perception/Object_detection_using_lidar/src/basic_shapes.cpp -o CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.s
-
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o.requires:
-
-.PHONY : CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o.requires
-
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o.provides: CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o.requires
-	$(MAKE) -f CMakeFiles/basic_shapes.dir/build.make CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o.provides.build
-.PHONY : CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o.provides
-
-CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o.provides.build: CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o
-
-
-# Object files for target basic_shapes
-basic_shapes_OBJECTS = \
-"CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o"
-
-# External object files for target basic_shapes
-basic_shapes_EXTERNAL_OBJECTS =
-
-../bin/basic_shapes: CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o
-../bin/basic_shapes: CMakeFiles/basic_shapes.dir/build.make
-../bin/basic_shapes: CMakeFiles/basic_shapes.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/robesafe/t4ac_ws/src/t4ac_perception/Object_detection_using_lidar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../bin/basic_shapes"
-	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/basic_shapes.dir/link.txt --verbose=$(VERBOSE)
-
-# Rule to build all files generated by this target.
-CMakeFiles/basic_shapes.dir/build: ../bin/basic_shapes
-
-.PHONY : CMakeFiles/basic_shapes.dir/build
-
-CMakeFiles/basic_shapes.dir/requires: CMakeFiles/basic_shapes.dir/src/basic_shapes.cpp.o.requires
+CMakeFiles/basic_shapes.dir/requires:
 
 .PHONY : CMakeFiles/basic_shapes.dir/requires
 

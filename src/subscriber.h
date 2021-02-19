@@ -1,6 +1,8 @@
 #ifndef SUBSCRIBER_H
 #define SUBSCRIBER_H
 
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <ros/ros.h>
 #include <cstdlib>
 #include <stdlib.h>
@@ -38,5 +40,7 @@ std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBoxes(std::vector<p
 std::pair<pcl::PointXYZ, pcl::PointXYZ> boundingBox(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster);
 
 void showBbRviz(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBoxes);
+
+Eigen::Quaterniond QuaternionRot(Eigen::Vector3d x1, Eigen::Vector3d y1, Eigen::Vector3d z1, Eigen::Vector3d x2, Eigen::Vector3d y2, Eigen::Vector3d z2);
 
 #endif

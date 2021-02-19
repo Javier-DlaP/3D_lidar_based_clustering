@@ -13,6 +13,10 @@ subscriber.h
 /home/robesafe/t4ac_ws/src/t4ac_perception/Object_detection_using_lidar/src/subscriber.h
 
 /home/robesafe/t4ac_ws/src/t4ac_perception/Object_detection_using_lidar/src/subscriber.h
+Eigen/Dense
+-
+Eigen/Geometry
+-
 ros/ros.h
 -
 cstdlib
