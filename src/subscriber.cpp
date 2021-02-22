@@ -35,7 +35,7 @@ void pclCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 
   std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = segmentPlane(filtered_point_cloud, 50, 0.3);
 
-  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = clustering(segmentCloud.first, 1.3, 20, 150);
+  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = clustering(segmentCloud.first, 1.4, 20, 150, 10, 1, 6, 6, 4);
 
   std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> bBoxes = boundingBoxes(clusters);
 
@@ -210,7 +210,7 @@ std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>:
 }
 
 // cluster the point cloud according to the kdtree algorithm
-std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clustering(typename pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, float clusterTolerance, int minSize, int maxSize)
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clustering(typename pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, float clusterTolerance, int minSize, int maxSize, float maxVolume, float minVolume, float maxWidth, float maxLength, float maxHeight)
 {
   std::cout << "Clustering the point cloud: ";
   auto startTime = std::chrono::steady_clock::now();
@@ -227,13 +227,15 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clustering(typename pcl::Point
     tree->insert(std::vector<float> {point.x, point.y, point.z}, i);
   }
 
-  // add to the vector of clusters the point cloud of nearby points that store a number of points between the maximum and the minumum selected
+  // add to the vector of clusters the point cloud of nearby points that store a number of points between the maximum and the minumum selected,
+  // are within the maximum length, width and height, and have a volume smaller than the selected maximum.
   std::vector<std::vector<int>> intclusters;
 	std::vector<bool> processed(vpoints.size(), false);
 	for (int i=0; i<(int)vpoints.size(); i++){
 		if(processed[i]==false){
 			std::vector<int> vcluster;
 			proximity(vpoints, i, vcluster, processed, tree, clusterTolerance);
+      
       if((int)vcluster.size() >= minSize && (int)vcluster.size() <= maxSize){
 			  intclusters.push_back(vcluster);
       }
@@ -249,7 +251,14 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clustering(typename pcl::Point
     cloudCluster->height = 1;
     cloudCluster->is_dense = true;
 
-    clusters.push_back(cloudCluster);
+    std::pair<pcl::PointXYZ, pcl::PointXYZ> bb = boundingBox(cloudCluster);
+    float width = abs(bb.first.x - bb.second.x);
+    float length = abs(bb.first.y - bb.second.y);
+    float height = abs(bb.first.z - bb.second.z);
+    float volume = width*length*height;
+    if(width < maxWidth && length < maxLength && height < maxHeight && volume < maxVolume && volume > minVolume){
+      clusters.push_back(cloudCluster);
+    }
   }
 
   auto endTime = std::chrono::steady_clock::now();

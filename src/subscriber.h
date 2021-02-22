@@ -1,8 +1,6 @@
 #ifndef SUBSCRIBER_H
 #define SUBSCRIBER_H
 
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
 #include <ros/ros.h>
 #include <cstdlib>
 #include <stdlib.h>
@@ -31,7 +29,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud(pcl::PointCloud<pcl::PointXYZI>
 
 std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentPlane(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, int maxIterations, float distanceThreshold);
 
-std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clustering(typename pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, float clusterTolerance, int minSize, int maxSize);
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clustering(typename pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, float clusterTolerance, int minSize, int maxSize, float maxVolume, float minVolume, float maxWidth, float maxLength, float maxHeight);
 
 void proximity(std::vector<std::vector<float>> points, int id_point, std::vector<int>& cluster, std::vector<bool>& processed, KdTree* tree, float distanceTol);
 
