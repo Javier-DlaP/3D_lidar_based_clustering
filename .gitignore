@@ -1,0 +1,10 @@
+CMakeFiles
+atomic_configure/
+catkin/
+catkin_generated/
+cmake
+cmake_install.cmake
+devel/
+gtest/
+
+

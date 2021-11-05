@@ -13,7 +13,9 @@ int main(int argc, char **argv)
   ros::NodeHandle nh;
   
   // Subscribers
+
   ros::Subscriber point_cloud = nh.subscribe("/carla/ego_vehicle/lidar/lidar1/point_cloud", 1, pclCallback);
+  // ros::Subscriber point_cloud = nh.subscribe("/velodyne_points", 1, pclCallback);
 
   // Publishers
   marker_pub = nh.advertise<visualization_msgs::MarkerArray>("/t4ac_perception/kd_tree", 1);
@@ -342,6 +344,7 @@ void showBbRviz(std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> boundingBox
     visualization_msgs::Marker marker_bb;
 
     marker_bb.header.frame_id = "ego_vehicle/lidar/lidar1";
+    // marker_bb.header.frame_id = "lidar_vlp16";
     marker_bb.header.stamp = ros::Time::now();
     marker_bb.id = i;
 
